@@ -93,7 +93,8 @@ jobs:
             libasound2-dev \
             libpulse-dev \
             libpipewire-0.3-dev \
-            libvulkan-dev
+            libvulkan-dev \
+            libluajit-5.1-dev
 
       - name: Build LGPL libmpv
         env:

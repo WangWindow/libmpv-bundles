@@ -119,7 +119,7 @@ log "Building mpv $MPV_TAG (LGPL, libmpv only)"
         -Dpipewire=enabled \
         -Dlibarchive=disabled \
         -Djavascript=disabled \
-        -Dlua=disabled \
+        -Dlua=luajit \
         -Dopenal=disabled \
         -Duchardet=disabled \
         -Dlibcurl=disabled \
