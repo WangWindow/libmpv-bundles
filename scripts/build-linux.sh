@@ -128,15 +128,15 @@ log "Building mpv $MPV_TAG (LGPL, libmpv only)"
         -Dcdda=disabled \
         -Drubberband=disabled \
         -Dvulkan=disabled \
-        -Dvaapi=disabled \
+        -Dvaapi=enabled \
         -Dvdpau=disabled \
         -Dcuda-hwaccel=disabled \
         -Dcuda-interop=disabled \
-        -Degl=disabled \
+        -Degl=enabled \
         -Ddrm=disabled \
-        -Dwayland=disabled \
-        -Dx11=disabled \
-        -Dgl-x11=disabled \
+        -Dwayland=enabled \
+        -Dx11=enabled \
+        -Dgl-x11=enabled \
         -Dlibavdevice=disabled
     meson compile -C build -j "$JOBS"
 )
