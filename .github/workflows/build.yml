@@ -97,25 +97,14 @@ jobs:
             libluajit-5.1-dev \
             libva-dev \
             libdrm-dev \
-            libwayland-dev \
-            wayland-protocols \
-            libxkbcommon-dev \
-            libx11-dev \
-            libxext-dev \
-            libxrandr-dev \
-            libxfixes-dev \
-            libxpresent-dev \
-            libxss-dev \
-            libxcb1-dev \
-            libxcb-shm0-dev \
-            libxcb-xfixes0-dev \
-            libxcb-randr0-dev \
-            libxcb-present-dev \
-            libxcb-sync-dev \
-            libxcb-shape0-dev \
-            libgl1-mesa-dev \
+            libdisplay-info-dev \
+            libgbm-dev \
             libegl1-mesa-dev \
-            libgbm-dev
+            libgl1-mesa-dev \
+            libxkbcommon-dev \
+            wayland-protocols \
+            libffi-dev \
+            libexpat1-dev
 
       - name: Build LGPL libmpv
         env:

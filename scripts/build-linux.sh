@@ -8,6 +8,7 @@ set -euo pipefail
 MPV_TAG="${MPV_TAG:-v0.42.0}"
 FFMPEG_TAG="${FFMPEG_TAG:-n9.0.2}"
 LIBPLACEBO_TAG="${LIBPLACEBO_TAG:-v7.387.0}"
+WAYLAND_TAG="${WAYLAND_TAG:-1.23.1}"
 RID="${RID:-linux-x64}"
 JOBS="${JOBS:-$(nproc)}"
 
@@ -22,6 +23,7 @@ BUNDLE="$WORK/bundle"
 MPV_SRC="${MPV_SRC:-$SRC/mpv}"
 FFMPEG_SRC="${FFMPEG_SRC:-$SRC/ffmpeg}"
 LIBPLACEBO_SRC="${LIBPLACEBO_SRC:-$SRC/libplacebo}"
+WAYLAND_SRC="${WAYLAND_SRC:-$SRC/wayland}"
 
 log() { printf '\n==> %s\n' "$*"; }
 
@@ -40,12 +42,15 @@ fetch() {
 fetch https://github.com/mpv-player/mpv.git "$MPV_TAG" "$MPV_SRC"
 fetch https://github.com/FFmpeg/FFmpeg.git "$FFMPEG_TAG" "$FFMPEG_SRC"
 fetch https://github.com/haasn/libplacebo.git "$LIBPLACEBO_TAG" "$LIBPLACEBO_SRC"
+fetch https://gitlab.freedesktop.org/wayland/wayland.git "$WAYLAND_TAG" "$WAYLAND_SRC"
 
 if [ "${REUSE:-0}" != "1" ]; then
     rm -rf "$PREFIX" "$BUILD"
 fi
 rm -rf "$BUNDLE"
 mkdir -p "$PREFIX" "$BUILD" "$BUNDLE" "$DIST"
+# 后续构建优先使用本地安装的 wayland-scanner；系统版本可能低于 mpv 要求。
+export PATH="$PREFIX/bin:$PATH"
 
 log "Building FFmpeg $FFMPEG_TAG (LGPL, shared)"
 mkdir -p "$BUILD/ffmpeg"
@@ -65,6 +70,8 @@ mkdir -p "$BUILD/ffmpeg"
         --disable-autodetect \
         --enable-zlib \
         --enable-libdav1d \
+        --enable-libdrm \
+        --enable-vaapi \
         --disable-gnutls \
         --disable-openssl
     make -j"$JOBS"
@@ -94,6 +101,21 @@ log "Building libplacebo $LIBPLACEBO_TAG (LGPL, OpenGL only)"
         -Ddovi=disabled \
         -Dunwind=disabled \
         -Dxxhash=disabled
+    meson compile -C build -j "$JOBS"
+    meson install -C build
+)
+
+log "Building Wayland $WAYLAND_TAG (client libraries and scanner)"
+(
+    cd "$WAYLAND_SRC"
+    rm -rf build
+    meson setup build \
+        --prefix="$PREFIX" \
+        --libdir=lib \
+        --buildtype=release \
+        -Ddocumentation=false \
+        -Dtests=false \
+        -Ddtd_validation=false
     meson compile -C build -j "$JOBS"
     meson install -C build
 )
@@ -129,14 +151,21 @@ log "Building mpv $MPV_TAG (LGPL, libmpv only)"
         -Drubberband=disabled \
         -Dvulkan=disabled \
         -Dvaapi=enabled \
+        -Dvaapi-drm=enabled \
+        -Dvaapi-wayland=enabled \
+        -Dvaapi-x11=disabled \
         -Dvdpau=disabled \
         -Dcuda-hwaccel=disabled \
         -Dcuda-interop=disabled \
         -Degl=enabled \
-        -Ddrm=disabled \
+        -Degl-drm=enabled \
+        -Degl-wayland=enabled \
+        -Degl-x11=disabled \
+        -Ddrm=enabled \
+        -Dgbm=enabled \
         -Dwayland=enabled \
-        -Dx11=enabled \
-        -Dgl-x11=enabled \
+        -Dx11=disabled \
+        -Dgl-x11=disabled \
         -Dlibavdevice=disabled
     meson compile -C build -j "$JOBS"
 )
